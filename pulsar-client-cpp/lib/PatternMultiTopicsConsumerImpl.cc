@@ -18,6 +18,14 @@
  */
 #include "PatternMultiTopicsConsumerImpl.h"
 
+#ifdef PULSAR_USE_BOOST_REGEX
+#include <boost/regex.hpp>
+#define PULSAR_REGEX_NAMESPACE boost
+#else
+#include <regex>
+#define PULSAR_REGEX_NAMESPACE std
+#endif
+
 DECLARE_LOG_OBJECT()
 
 using namespace pulsar;
@@ -31,13 +39,13 @@ PatternMultiTopicsConsumerImpl::PatternMultiTopicsConsumerImpl(ClientImplPtr cli
     : MultiTopicsConsumerImpl(client, topics, subscriptionName, TopicName::get(pattern), conf,
                               lookupServicePtr_),
       patternString_(pattern),
-      pattern_(std::regex(pattern)),
+      pattern_(PULSAR_REGEX_NAMESPACE::regex(pattern)),
       autoDiscoveryTimer_(),
       autoDiscoveryRunning_(false) {
     namespaceName_ = TopicName::get(pattern)->getNamespaceName();
 }
 
-const std::regex PatternMultiTopicsConsumerImpl::getPattern() { return pattern_; }
+const PULSAR_REGEX_NAMESPACE::regex PatternMultiTopicsConsumerImpl::getPattern() { return pattern_; }
 
 void PatternMultiTopicsConsumerImpl::resetAutoDiscoveryTimer() {
     autoDiscoveryRunning_ = false;
@@ -189,11 +197,11 @@ void PatternMultiTopicsConsumerImpl::onTopicsRemoved(NamespaceTopicsPtr removedT
 }
 
 NamespaceTopicsPtr PatternMultiTopicsConsumerImpl::topicsPatternFilter(const std::vector<std::string>& topics,
-                                                                       const std::regex& pattern) {
+                                                                       const PULSAR_REGEX_NAMESPACE::regex& pattern) {
     NamespaceTopicsPtr topicsResultPtr = std::make_shared<std::vector<std::string>>();
 
     for (std::vector<std::string>::const_iterator itr = topics.begin(); itr != topics.end(); itr++) {
-        if (std::regex_match(*itr, pattern)) {
+        if (PULSAR_REGEX_NAMESPACE::regex_match(*itr, pattern)) {
             topicsResultPtr->push_back(*itr);
         }
     }

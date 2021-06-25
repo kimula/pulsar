@@ -46,8 +46,10 @@ namespace ptree = boost::property_tree;
 
 #ifdef PULSAR_USE_BOOST_REGEX
 #include <boost/regex.hpp>
+#define PULSAR_REGEX_NAMESPACE boost
 #else
 #include <regex>
+#define PULSAR_REGEX_NAMESPACE std
 #endif
 
 DECLARE_LOG_OBJECT()
@@ -376,10 +378,10 @@ PrivateKeyUri ZTSClient::parseUri(const char *uri) {
         uriSt.data = groups.str(4);
     }
 #else   // !PULSAR_USE_BOOST_REGEX
-    static const std::regex expression(
+    static const PULSAR_REGEX_NAMESPACE::regex expression(
         R"(^(?:([A-Za-z]+):)(?:([/\w\-]+;\w+),([=\w]+))?(?:\/\/)?(\/[^?#]+)?)");
     std::cmatch groups;
-    if (std::regex_match(uri, groups, expression)) {
+    if (PULSAR_REGEX_NAMESPACE::regex_match(uri, groups, expression)) {
         uriSt.scheme = groups.str(1);
         uriSt.mediaTypeAndEncodingType = groups.str(2);
         uriSt.data = groups.str(3);
